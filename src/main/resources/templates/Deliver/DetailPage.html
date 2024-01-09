@@ -22,11 +22,7 @@
 
         // 커넥션이 제대로 생성되었을 때
         socket.onopen = function (e) {
-            let data = {
-                action: "good",
-                subscribe: "test",
-            };
-            socket.send(JSON.stringify(data))
+
         };
 
 
@@ -35,15 +31,7 @@
 
         // 데이터를 수신 받았을 때
         socket.onmessage = async function (e) {
-            try {
-                if (e !== null && e !== undefined) {
-                    result = await JSON.parse(e.data);
-                    price = result[0];
-                    document.getElementById("test").innerHTML = `$ ${price}`
-                }
-            } catch (err) {
-                console.log(err);
-            }
+
         };
 
         // 에러가 발생했을 때
