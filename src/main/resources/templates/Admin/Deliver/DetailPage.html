@@ -13,7 +13,7 @@
 <!-- Content -->
 <div layout:fragment="content">
     어드민배달상세페이지
-    <button onclick="startDeliver()">배달 시작</button>
+    <button id="btn" onclick="startDeliver()">배달 시작</button>
 </div>
 <!-- index.html 고유 스크립트 추가 -->
 <th:block layout:fragment="script">
@@ -25,12 +25,15 @@
         let pathVariableValue = urlParts[4]; // index는 0부터 시작하므로, 4는 세 번째 요소를 나타냄
         // 가져온 값을 콘솔에 출력 또는 필요한 작업 수행
         let socket = null;
+        const btn = document.getElementById('btn');
         function startDeliver() {
             // 웹소켓 생성
             socket = new WebSocket(`ws://localhost:8080/ws/deliver?did=${pathVariableValue}&role=admin`);
 
             // 커넥션이 제대로 생성되었을 때
             socket.onopen = function (e) {
+                // Disable the button
+                btn.disabled = true;
                 if(navigator.geolocation){
                     navigator.geolocation.watchPosition(success,null,null);
                 }
@@ -39,6 +42,8 @@
             socket.onerror = function (e) {
                 alert('웹소켓 연결 실패');
                 console.log(e);
+                btn.disabled = false;
+
             };
         }
         function success(position) {
