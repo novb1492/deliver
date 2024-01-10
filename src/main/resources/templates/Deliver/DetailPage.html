@@ -17,8 +17,14 @@
 <!-- index.html 고유 스크립트 추가 -->
 <th:block layout:fragment="script">
     <script>
+        let currentUrl = window.location.href;
+        // URL을 "/"로 분할
+        let urlParts = currentUrl.split("/");
+        // Path variable 위치에서 값을 가져옴 (예: /deliver/1/admin에서 2번째 요소)
+        let pathVariableValue = urlParts[4]; // index는 0부터 시작하므로, 4는 세 번째 요소를 나타냄
+        // 가져온 값을 콘솔에 출력 또는 필요한 작업 수행
         // 웹소켓 생성
-        const socket = new WebSocket("ws://localhost:8080/ws/deliver");
+        const socket = new WebSocket(`ws://localhost:8080/ws/deliver?did=${pathVariableValue}&role=user`);
 
         // 커넥션이 제대로 생성되었을 때
         socket.onopen = function (e) {
