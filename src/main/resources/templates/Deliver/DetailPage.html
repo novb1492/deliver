@@ -4,6 +4,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/default_layout}">
 <head>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=60231bf6e01cbab89d9c0f4ffa30878d"></script>
     <title>배달상세페이지</title>
 </head>
 <!-- index.html 고유 CSS 추가 -->
@@ -15,6 +16,7 @@
     배달상세페이지
     <div id="lat"></div>
     <div id="lon"></div>
+    <div id="map" style="width:500px;height:400px;"></div>
 </div>
 <!-- index.html 고유 스크립트 추가 -->
 <th:block layout:fragment="script">
@@ -27,10 +29,17 @@
         // 가져온 값을 콘솔에 출력 또는 필요한 작업 수행
         // 웹소켓 생성
         const socket = new WebSocket(`ws://localhost:8080/ws/deliver?did=${pathVariableValue}&role=user`);
-
+        let map =null;
+        let marker=null;
         // 커넥션이 제대로 생성되었을 때
         socket.onopen = function (e) {
             console.log('유저배달방입장');
+            let container = document.getElementById('map');
+            let options = {
+                center: new kakao.maps.LatLng(33.450701, 126.570667),
+                level: 3
+            };
+            map = new kakao.maps.Map(container, options);
         };
 
         // 데이터를 수신 받았을 때
@@ -43,7 +52,22 @@
             // 가져온 값을 화면에 표시 (예: HTML 요소에 추가)
             document.getElementById('lat').innerText = `lat: ${letValue}`;
             document.getElementById('lon').innerText = `lon: ${lonValue}`;
-        };
+            // 이전에 생성된 마커가 있으면 제거
+            console.log(marker);
+            if (marker!==null) {
+                marker.setMap(null);
+            }
+            // 마커 위치 생성
+            let markerPosition = new kakao.maps.LatLng(letValue, lonValue);
+            // 위치를 사용하여 마커 생성
+            marker = new kakao.maps.Marker({
+                position: markerPosition,
+            });
+            // 마커를 지도에 추가
+            marker.setMap(map);
+            // 지도 중심 이동
+            map.setCenter(markerPosition);
+        }.bind(this);
 
         // 에러가 발생했을 때
         socket.onerror = function (e) {
