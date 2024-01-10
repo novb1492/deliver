@@ -13,6 +13,7 @@
 <!-- Content -->
 <div layout:fragment="content">
     어드민배달상세페이지
+    <button onclick="startDeliver()">배달 시작</button>
 </div>
 <!-- index.html 고유 스크립트 추가 -->
 <th:block layout:fragment="script">
@@ -23,32 +24,33 @@
         // Path variable 위치에서 값을 가져옴 (예: /deliver/1/admin에서 2번째 요소)
         let pathVariableValue = urlParts[4]; // index는 0부터 시작하므로, 4는 세 번째 요소를 나타냄
         // 가져온 값을 콘솔에 출력 또는 필요한 작업 수행
-        // 웹소켓 생성
-        const socket = new WebSocket(`ws://localhost:8080/ws/deliver?did=${pathVariableValue}&role=admin`);
+        let socket = null;
+        function startDeliver() {
+            // 웹소켓 생성
+            socket = new WebSocket(`ws://localhost:8080/ws/deliver?did=${pathVariableValue}&role=admin`);
 
-        // 커넥션이 제대로 생성되었을 때
-        socket.onopen = function (e) {
+            // 커넥션이 제대로 생성되었을 때
+            socket.onopen = function (e) {
+                if(navigator.geolocation){
+                    navigator.geolocation.watchPosition(success,null,null);
+                }
+            };
+            // 에러가 발생했을 때
+            socket.onerror = function (e) {
+                alert('웹소켓 연결 실패');
+                console.log(e);
+            };
+        }
+        function success(position) {
             let data = {
                 action: "send",
                 did: pathVariableValue,
-                location:"12,14"
+                lat:position.coords.latitude,// 위도
+                lon:position.coords.longitude // 경도
             };
-            socket.send(JSON.stringify(data))
+            socket.send(JSON.stringify(data));
         };
 
-
-        let result;
-        let price;
-
-        // 데이터를 수신 받았을 때
-        socket.onmessage = async function (e) {
-           console.log(e);
-        };
-
-        // 에러가 발생했을 때
-        socket.onerror = function (e) {
-            console.log(e);
-        };
     </script>
 
 </th:block>
